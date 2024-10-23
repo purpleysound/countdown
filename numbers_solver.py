@@ -1,5 +1,5 @@
 import heapq
-
+import time
 
 def add(a: int, b: int) -> int:
     return a + b
@@ -54,6 +54,37 @@ class Solution:
 def numbers_solver(numbers: list[int], target: int) -> Solution | None:
     q = [Solution(numbers, target, [])]
     while q:
+        solution = heapq.heappop(q)
+        if target in solution.numbers:
+            return solution
+        if len(solution.numbers) == 1:
+            continue
+        for i, num1 in enumerate(solution.numbers):
+            for j, num2 in enumerate(solution.numbers):
+                if i == j:
+                    continue
+                for operation in (add, subtract, multiply):
+                    new_solution = solution.copy()
+                    new_solution.numbers.pop(max(i, j))
+                    new_solution.numbers.pop(min(i, j))
+                    new_solution.numbers.append(new_solution.make_step((num1, num2), operation))
+                    heapq.heappush(q, new_solution)
+                if divide(num1, num2):
+                    new_solution = solution.copy()
+                    new_solution.numbers.pop(max(i, j))
+                    new_solution.numbers.pop(min(i, j))
+                    new_solution.numbers.append(new_solution.make_step((num1, num2), divide))
+                    heapq.heappush(q, new_solution)
+    return None
+
+
+def number_solver_gives_up(numbers: list[int], target: int, seconds) -> Solution | None:
+    t0 = time.time()
+    q = [Solution(numbers, target, [])]
+    while q:
+        if time.time() - t0 > seconds:
+            return None
+        
         solution = heapq.heappop(q)
         if target in solution.numbers:
             return solution
