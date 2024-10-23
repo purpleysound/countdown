@@ -1,8 +1,9 @@
 import pygame
 import enum
 
+pygame.font.init()
 _DEFAULT_SCREEN_SIZE = (800, 600)
-_DEFAIULT_FONT_NAME = "Segoe UI"
+_DEFAIULT_FONT_NAME = "Lucinda"
 _DEFAULT_FONT_SIZE = 52
 _DEFAULT_FONT = pygame.font.SysFont(_DEFAIULT_FONT_NAME, _DEFAULT_FONT_SIZE)
 
