@@ -1,0 +1,82 @@
+import pygame
+import enum
+
+_DEFAULT_SCREEN_SIZE = (800, 600)
+
+class ReturnValues(enum.Enum):
+    NEXT_SCENE = "next_scene"
+
+
+class Scene:
+    def __init__(self, **kwargs):
+        self._ended = False
+        self._return_values = dict()
+    
+    def update(self):
+        raise NotImplementedError("Subclasses must implement method 'update'")
+
+    def draw(self, screen: pygame.Surface):
+        raise NotImplementedError("Subclasses must implement method 'draw'")
+
+    def handle_event(self, event: pygame.event.Event):
+        raise NotImplementedError("Subclasses must implement method 'handle_event'")
+    
+    def end_scene(self):
+        self._ended = True
+    
+    def has_ended(self):
+        return self._ended
+    
+    def get_return_values(self):
+        return self._return_values
+    
+
+class SceneHandler:
+    def __init__(self, screen_size: tuple[int, int] = _DEFAULT_SCREEN_SIZE):
+        self._screen = pygame.display.set_mode(screen_size)
+        self._clock = pygame.time.Clock()
+        self._running = True
+        self._current_scene = None
+
+    def run(self):
+        if self._current_scene is None:
+            raise RuntimeError("No scene has been set to run")
+        while self._running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self._running = False
+                else:
+                    self._current_scene.handle_event(event)
+            
+            self._current_scene.update()
+            if self._current_scene.has_ended():
+                self._handle_scene_end()
+
+            self._current_scene.draw(self._screen)
+
+            pygame.display.flip()
+            self._clock.tick(60)
+
+    def set_scene(self, scene: Scene):
+        self._current_scene = scene
+
+    def _handle_scene_end(self):
+        assert self._current_scene is not None
+
+        return_values = self._current_scene.get_return_values()
+        next_scene_type = return_values.get(ReturnValues.NEXT_SCENE)
+        if next_scene_type is None:
+            self._running = False
+            return
+        next_scene = next_scene_type(**return_values)
+        assert isinstance(next_scene, Scene)
+        self.set_scene(next_scene)
+
+
+def load_image(path: str, size: tuple[int, int]) -> pygame.surface.Surface:
+    image = pygame.image.load(path)
+    try:
+        image = pygame.transform.smoothscale(image, size)
+    except ValueError:
+        image = pygame.transform.scale(image, size)
+    return image
