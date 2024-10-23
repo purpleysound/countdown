@@ -24,7 +24,7 @@ class ReturnValues(enum.Enum):
 
 
 class Scene:
-    def __init__(self, **kwargs):
+    def __init__(self, returned_values):
         self._ended = False
         self._return_values = dict()
     
@@ -93,7 +93,7 @@ class SceneHandler:
         if next_scene_type is None:
             self._running = False
             return
-        next_scene = next_scene_type(**return_values)
+        next_scene = next_scene_type(return_values)
         assert isinstance(next_scene, Scene)
         self.set_scene(next_scene)
 

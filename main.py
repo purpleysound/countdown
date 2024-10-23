@@ -1,6 +1,5 @@
 import pygame
 import pygame_utils
-import random
 from main_menu import MainMenuScene
 
 DEFAULT_FONT_NAME = "Lucinda"

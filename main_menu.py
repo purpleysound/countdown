@@ -15,8 +15,8 @@ _DARK_RED = (136, 0, 21)
 
 
 class Modes(enum.Enum):
-    TIME_LIMIT = "time_limit"
-    STOPWATCH = "stopwatch"
+    TIME_LIMIT = -1
+    STOPWATCH = 1
 
 
 class Difficulty(enum.Enum):
@@ -24,10 +24,12 @@ class Difficulty(enum.Enum):
     MEDIUM = 1
     HARD = 2
 
+import game
+
 
 class MainMenuScene(pygame_utils.Scene):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, returned_values={}):
+        super().__init__(returned_values)
         self._title = _DEFAULT_FONT.render("Countdown", True, _DEFAULT_TEXT_COLOR)
         self._title_rect = self._title.get_rect(center=(400, 50))
         
@@ -110,7 +112,7 @@ class MainMenuScene(pygame_utils.Scene):
         
     def _end_scene(self):
         self._return_values = {
-            # pygame_utils.ReturnValues.NEXT_SCENE: GameScene,
+            pygame_utils.ReturnValues.NEXT_SCENE: game.GameScene,
             "mode": self._mode,
             "difficulty": self._difficulty,
         }
