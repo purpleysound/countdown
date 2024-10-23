@@ -13,7 +13,7 @@ DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 
 if __name__ == "__main__":
     pygame.init()
-    __scene_handler = pygame_utils.SceneHandler()  # please dont use this anywhere else <3
+    __scene_handler = pygame_utils.SceneHandler(title = "Countdown Numbers Game")  # please dont use this anywhere else <3
     __scene_handler.set_scene(MainMenuScene())    
     __scene_handler.run()
     pygame.quit()

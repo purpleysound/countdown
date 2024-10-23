@@ -48,8 +48,17 @@ class Scene:
     
 
 class SceneHandler:
-    def __init__(self, screen_size: tuple[int, int] = _DEFAULT_SCREEN_SIZE):
+    def __init__(self,
+                 screen_size: tuple[int, int] = _DEFAULT_SCREEN_SIZE,
+                 title: str = "",
+                 icon_path: str = ""
+                 ):
         self._screen = pygame.display.set_mode(screen_size)
+        if title:
+            pygame.display.set_caption(title)
+        if icon_path:
+            icon = load_image(icon_path, (32, 32))
+            pygame.display.set_icon(icon)
         self._clock = pygame.time.Clock()
         self._running = True
         self._current_scene = None
