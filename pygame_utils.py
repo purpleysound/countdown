@@ -2,6 +2,21 @@ import pygame
 import enum
 
 _DEFAULT_SCREEN_SIZE = (800, 600)
+_DEFAIULT_FONT_NAME = "Segoe UI"
+_DEFAULT_FONT_SIZE = 52
+_DEFAULT_FONT = pygame.font.SysFont(_DEFAIULT_FONT_NAME, _DEFAULT_FONT_SIZE)
+
+
+def load_image(path: str, size: tuple[int, int]) -> pygame.surface.Surface:
+    image = pygame.image.load(path)
+    try:
+        image = pygame.transform.smoothscale(image, size)
+    except ValueError:
+        image = pygame.transform.scale(image, size)
+    return image
+
+_TRANSPARENT_PIXEL = load_image("assets/transparent_pixel.png", (1, 1))
+
 
 class ReturnValues(enum.Enum):
     NEXT_SCENE = "next_scene"
@@ -64,7 +79,7 @@ class SceneHandler:
         assert self._current_scene is not None
 
         return_values = self._current_scene.get_return_values()
-        next_scene_type = return_values.get(ReturnValues.NEXT_SCENE)
+        next_scene_type = return_values.get(ReturnValues.NEXT_SCENE, None)
         if next_scene_type is None:
             self._running = False
             return
@@ -73,10 +88,48 @@ class SceneHandler:
         self.set_scene(next_scene)
 
 
-def load_image(path: str, size: tuple[int, int]) -> pygame.surface.Surface:
-    image = pygame.image.load(path)
-    try:
-        image = pygame.transform.smoothscale(image, size)
-    except ValueError:
-        image = pygame.transform.scale(image, size)
-    return image
+class Button(pygame.sprite.Sprite):
+    def __init__(self, rect: pygame.rect.Rect,
+                 font: pygame.font.Font = _DEFAULT_FONT,
+                 text: str = "",
+                 text_color: tuple[int, int, int] = (255, 255, 255),
+                 background_color: tuple[int, int, int] = (0, 0, 0),
+                 image: pygame.surface.Surface = _TRANSPARENT_PIXEL
+                 ):
+        super().__init__()
+        self._rect = rect
+        self._text_color = text_color
+        self._background_color = background_color
+
+        self._font = font
+        self._text = text
+
+        self._image = image
+
+    def draw(self, screen: pygame.surface.Surface):
+        screen.fill(self._background_color, self._rect)
+        screen.blit(self._image, self._rect.topleft)
+        text_surface = self._font.render(self._text, True, self._text_color)
+        screen.blit(text_surface, text_surface.get_rect(center=self._rect.center))
+
+    def is_intersecting(self, point: tuple[int, int]) -> bool:
+        return self._rect.collidepoint(point)
+    
+    def set_text(self, text: str):
+        self._text = text
+
+    def set_font(self, font: pygame.font.Font):
+        self._font = font
+
+    def set_text_color(self, color: tuple[int, int, int]):
+        self._text_color = color
+
+    def set_background_color(self, color: tuple[int, int, int]):
+        self._background_color = color
+
+    def set_image(self, image: pygame.surface.Surface):
+        self._image = image
+
+    def set_rect(self, rect: pygame.rect.Rect):
+        self._rect = rect
+
