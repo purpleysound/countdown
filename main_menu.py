@@ -64,7 +64,7 @@ class MainMenuScene(pygame_utils.Scene):
         self._to_start_rect = self._to_start_text.get_rect(center=(400, 525))
 
 
-    def update(self):
+    def update(self, dt: int):
         pass
 
     def draw(self, screen: pygame.Surface):

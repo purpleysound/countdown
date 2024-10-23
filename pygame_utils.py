@@ -28,7 +28,7 @@ class Scene:
         self._ended = False
         self._return_values = dict()
     
-    def update(self):
+    def update(self, dt: int):
         raise NotImplementedError("Subclasses must implement method 'update'")
 
     def draw(self, screen: pygame.Surface):
@@ -73,14 +73,14 @@ class SceneHandler:
                 else:
                     self._current_scene.handle_event(event)
             
-            self._current_scene.update()
+            dt = self._clock.tick(60)
+            self._current_scene.update(dt)
             if self._current_scene.has_ended():
                 self._handle_scene_end()
 
             self._current_scene.draw(self._screen)
 
             pygame.display.flip()
-            self._clock.tick(60)
 
     def set_scene(self, scene: Scene):
         self._current_scene = scene
