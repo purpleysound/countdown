@@ -7,7 +7,9 @@ from main_menu import Modes, Difficulty
 
 _DEFAULT_FONT_NAME = "Lucinda"
 _DEFAULT_FONT_SIZE = 96
+_OPERATOR_FONT_SIZE = 128
 _DEFAULT_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _DEFAULT_FONT_SIZE)
+_OPERATOR_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _OPERATOR_FONT_SIZE)
 _DEFAULT_TEXT_COLOR = (255, 255, 255)
 _DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 
@@ -34,6 +36,17 @@ class GameScene(pygame_utils.Scene):
         self._timer_direction = mode.value
         self._timer_started = False
 
+        self._target_text = _DEFAULT_FONT.render(f"Target: {self._target}", True, _DEFAULT_TEXT_COLOR)
+        self._target_text_rect = self._target_text.get_rect(center=(400, 150))
+
+        self._generate_number_buttons()
+        self._operation_buttons = [
+            pygame_utils.Button(pygame.rect.Rect(80, 325, 100, 100), _OPERATOR_FONT, "+", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
+            pygame_utils.Button(pygame.rect.Rect(260, 325, 100, 100), _OPERATOR_FONT, "-", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
+            pygame_utils.Button(pygame.rect.Rect(440, 325, 100, 100), _OPERATOR_FONT, "×", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
+            pygame_utils.Button(pygame.rect.Rect(620, 325, 100, 100), _OPERATOR_FONT, "÷", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
+        ]
+
     def update(self, dt: int):
         if not self._timer_started:
             self._timer_started = True
@@ -45,9 +58,32 @@ class GameScene(pygame_utils.Scene):
 
     def draw(self, screen: pygame.Surface):
         screen.fill(_DEFAULT_BACKGROUND_COLOR)
-        timer_text = _DEFAULT_FONT.render(str(self._timer // 1000), True, _DEFAULT_TEXT_COLOR)
+        timer_text = _DEFAULT_FONT.render(f"{self._timer // 1000} Seconds", True, _DEFAULT_TEXT_COLOR)
         timer_rect = timer_text.get_rect(center=(400, 50))
         screen.blit(timer_text, timer_rect)
+        screen.blit(self._target_text, self._target_text_rect)
+        for button in self._number_buttons:
+            button.draw(screen) 
+        for button in self._operation_buttons:
+            button.draw(screen)
+        
+        
+    def _generate_number_buttons(self):
+        self._number_buttons = []
+        num_count = len(self._numbers)
+        mid_point = (num_count-1)/2
+        for i, num in enumerate(self._numbers):
+            centre = (400 + (i - mid_point) * 125, 225)
+            left, top = centre[0] - 50, centre[1]
+            button_rect = pygame.rect.Rect(left, top, 100, 100)
+            button = pygame_utils.Button(button_rect,
+                                         text=str(num),
+                                         font=_DEFAULT_FONT,
+                                         text_color=_DEFAULT_TEXT_COLOR,
+                                         background_color=_DEFAULT_BACKGROUND_COLOR
+                                         )
+            self._number_buttons.append(button)
+
 
     def handle_event(self, event: pygame.event.Event):
         pass
