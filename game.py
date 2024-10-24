@@ -13,6 +13,20 @@ _OPERATOR_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _OPERATOR_FONT_SIZE)
 _DEFAULT_TEXT_COLOR = (255, 255, 255)
 _DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 
+_OPERATOR_NUM_TO_TEXT = {
+    0: "+",
+    1: "-",
+    2: "×",
+    3: "÷"
+}
+
+_OPERATOR_NUM_TO_FUNC = {
+    0: lambda x, y: x + y,
+    1: lambda x, y: x - y,
+    2: lambda x, y: x * y,
+    3: lambda x, y: x / y
+}
+
 
 class GameScene(pygame_utils.Scene):
     def __init__(self, returned_values):
@@ -46,6 +60,8 @@ class GameScene(pygame_utils.Scene):
             pygame_utils.Button(pygame.rect.Rect(440, 325, 100, 100), _OPERATOR_FONT, "×", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
             pygame_utils.Button(pygame.rect.Rect(620, 325, 100, 100), _OPERATOR_FONT, "÷", _DEFAULT_TEXT_COLOR, _DEFAULT_BACKGROUND_COLOR),
         ]
+        self._current_expression: list[int, int, int] = []
+        self._update_expression_text()
 
     def update(self, dt: int):
         if not self._timer_started:
@@ -66,6 +82,7 @@ class GameScene(pygame_utils.Scene):
             button.draw(screen) 
         for button in self._operation_buttons:
             button.draw(screen)
+        screen.blit(self._expression_text, self._expression_text_rect)
         
         
     def _generate_number_buttons(self):
@@ -86,7 +103,66 @@ class GameScene(pygame_utils.Scene):
 
 
     def handle_event(self, event: pygame.event.Event):
-        pass
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if len(self._current_expression) in (0, 2):
+                for i, button in enumerate(self._number_buttons):
+                    if button.is_intersecting(event.pos):
+                        self._current_expression.append(self._numbers[i])
+                        self._update_expression_text()
+                        break
+            elif len(self._current_expression) == 1:
+                for i, button in enumerate(self._operation_buttons):
+                    if button.is_intersecting(event.pos):
+                        self._current_expression.append(i)
+                        self._update_expression_text()
+                        break
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                try:
+                    self._current_expression.pop()
+                except IndexError:
+                    pass
+                self._update_expression_text()
+            elif event.key == pygame.K_RETURN:
+                if len(self._current_expression) == 3:
+                    result, success = self._evaluate_expression()
+                    if success:
+                        self._numbers.remove(self._current_expression[0])
+                        self._numbers.remove(self._current_expression[2])
+                        self._numbers.append(result)
+                        self._current_expression = []
+                        self._generate_number_buttons()
+                        self._update_expression_text()
+                        if result == self._target:
+                            print("Victory")
+
+    def _update_expression_text(self):
+        if len(self._current_expression) == 0:
+            self._expression_text = _DEFAULT_FONT.render("", True, _DEFAULT_TEXT_COLOR)
+        elif len(self._current_expression) == 1:
+            self._expression_text = _DEFAULT_FONT.render(str(self._current_expression[0]), True, _DEFAULT_TEXT_COLOR)
+        elif len(self._current_expression) == 2:
+            num1, operation_num = self._current_expression
+            self._expression_text = _DEFAULT_FONT.render(f"{num1} {_OPERATOR_NUM_TO_TEXT[operation_num]}", True, _DEFAULT_TEXT_COLOR)
+        elif len(self._current_expression) == 3:
+            num1, operation_num, num2 = self._current_expression
+            result, success = self._evaluate_expression()
+            if not success:
+                if isinstance(result, float):
+                    result = round(result, 2)
+                result = f"Disallowed ({result})"
+            self._expression_text = _DEFAULT_FONT.render(f"{num1} {_OPERATOR_NUM_TO_TEXT[operation_num]} {num2} = {result}", True, _DEFAULT_TEXT_COLOR)
+        else:
+            raise RuntimeError("Invalid expression length")
+        self._expression_text_rect = self._expression_text.get_rect(center=(400, 450))
+
+    def _evaluate_expression(self) -> tuple[int, bool]:
+        assert len(self._current_expression) == 3
+        num1, operation_num, num2 = self._current_expression
+        result = _OPERATOR_NUM_TO_FUNC[operation_num](num1, num2)
+        if not result.is_integer() or result < 0:
+            return result, False
+        return int(result), True
 
     def _time_out(self):
         pass
