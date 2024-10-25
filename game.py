@@ -32,6 +32,7 @@ class GameScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
         self._numbers, self._target, self._solution = generate_numbers()
+        self._original_numbers = self._numbers.copy()
         mode = returned_values["mode"] # 1 for stopwatch, -1 for time limit countdown
         if mode == Modes.STOPWATCH:
             self._timer = 0
@@ -135,6 +136,11 @@ class GameScene(pygame_utils.Scene):
                         self._update_expression_text()
                         if result == self._target:
                             print("Victory")
+            elif event.key == pygame.K_ESCAPE:
+                self._numbers = self._original_numbers.copy()
+                self._generate_number_buttons()
+                self._current_expression = []
+                self._update_expression_text()
 
     def _update_expression_text(self):
         if len(self._current_expression) == 0:
