@@ -91,7 +91,7 @@ class GameScene(pygame_utils.Scene):
         num_count = len(self._numbers)
         mid_point = (num_count-1)/2
         for i, num in enumerate(self._numbers):
-            centre = (400 + (i - mid_point) * 125, 225)
+            centre = (400 + (i - mid_point) * (125 + 25 * (6-num_count)), 225)
             left, top = centre[0] - 50, centre[1]
             button_rect = pygame.rect.Rect(left, top, 100, 100)
             button = pygame_utils.Button(button_rect,
