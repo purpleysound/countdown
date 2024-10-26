@@ -46,6 +46,9 @@ class Scene:
     def get_return_values(self):
         return self._return_values
     
+    def handle_quit(self):
+        pass
+    
 
 class SceneHandler:
     def __init__(self,
@@ -70,6 +73,7 @@ class SceneHandler:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self._running = False
+                    self._current_scene.handle_quit()
                 else:
                     self._current_scene.handle_event(event)
             

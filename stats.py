@@ -30,11 +30,12 @@ def update_stats(returned_values):
     else:
         current_stats["time_limit_games_played"] += 1
         difficulty = returned_values["difficulty"].value
+        difficulty_name = ("easy", "medium", "hard")[difficulty]
         if returned_values["win"]:
             key = "wins"
         else:
             key = "losses"
-        current_stats[f"{difficulty}_{key}"] += 1
+        current_stats[f"{difficulty_name}_{key}"] += 1
         start_time = (2 - difficulty) * 30000 + 31000
         time_taken = start_time - returned_values["timer"]
     current_stats["total_time"] += time_taken

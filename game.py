@@ -189,6 +189,17 @@ class GameScene(pygame_utils.Scene):
         }
         self._ended = True
 
+    def handle_quit(self):
+        self._return_values = {
+            pygame_utils.ReturnValues.NEXT_SCENE: StatsScene,
+            "mode": self._timer_direction,
+            "difficulty": self._difficulty,
+            "username": self._return_values["username"],
+            "timer": self._timer,
+            "win": False
+        }
+        self._ended = True
+
 
 def generate_numbers() -> tuple[list[int, int, int, int, int, int], int, numbers_solver.Solution]:
     """Generates 6 numbers for the game and a target number"""
