@@ -1,6 +1,6 @@
 import pygame
 import pygame_utils
-from main_menu import MainMenuScene
+from name_entry import NameEntryScene
 
 DEFAULT_FONT_NAME = "Lucinda"
 DEFAULT_FONT_SIZE = 52
@@ -13,6 +13,6 @@ DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 if __name__ == "__main__":
     pygame.init()
     __scene_handler = pygame_utils.SceneHandler(title = "Countdown Numbers Game")  # please dont use this anywhere else <3
-    __scene_handler.set_scene(MainMenuScene())    
+    __scene_handler.set_scene(NameEntryScene())    
     __scene_handler.run()
     pygame.quit()

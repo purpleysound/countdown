@@ -31,6 +31,7 @@ _OPERATOR_NUM_TO_FUNC = {
 class GameScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
+        self._return_values["username"] = returned_values["username"]
         self._numbers, self._target, self._solution = generate_numbers()
         self._original_numbers = self._numbers.copy()
         mode = returned_values["mode"] # 1 for stopwatch, -1 for time limit countdown
