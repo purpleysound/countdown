@@ -108,7 +108,7 @@ class GameScene(pygame_utils.Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if len(self._current_expression) in (0, 2):
+            if len(self._current_expression) == 0:
                 for i, button in enumerate(self._number_buttons):
                     if button.is_intersecting(event.pos):
                         self._current_expression.append(self._numbers[i])
@@ -118,6 +118,14 @@ class GameScene(pygame_utils.Scene):
                 for i, button in enumerate(self._operation_buttons):
                     if button.is_intersecting(event.pos):
                         self._current_expression.append(i)
+                        self._update_expression_text()
+                        break
+            elif len(self._current_expression) == 2:
+                for i, button in enumerate(self._number_buttons):
+                    if button.is_intersecting(event.pos):
+                        if self._numbers[i] == self._current_expression[0] and self._numbers.count(self._current_expression[0]) == 1:
+                            continue
+                        self._current_expression.append(self._numbers[i])
                         self._update_expression_text()
                         break
         if event.type == pygame.KEYDOWN:
