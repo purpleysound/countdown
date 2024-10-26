@@ -3,6 +3,7 @@ import pygame_utils
 import random
 import numbers_solver
 from main_menu import Modes, Difficulty
+from stats import StatsScene
 
 
 _DEFAULT_FONT_NAME = "Lucinda"
@@ -34,9 +35,10 @@ class GameScene(pygame_utils.Scene):
         self._return_values["username"] = returned_values["username"]
         self._numbers, self._target, self._solution = generate_numbers()
         self._original_numbers = self._numbers.copy()
-        mode = returned_values["mode"] # 1 for stopwatch, -1 for time limit countdown
+        mode = returned_values["mode"]
         if mode == Modes.STOPWATCH:
             self._timer = 0
+            self._difficulty = -1
         elif mode == Modes.TIME_LIMIT:
             self._difficulty = returned_values["difficulty"]
             if self._difficulty == Difficulty.EASY:
@@ -49,7 +51,7 @@ class GameScene(pygame_utils.Scene):
                 raise ValueError("Invalid difficulty")
         else:
             raise ValueError("Invalid mode")
-        self._timer_direction = mode.value
+        self._timer_direction = mode.value # 1 for stopwatch, -1 for time limit countdown
         self._timer_started = False
 
         self._target_text = _DEFAULT_FONT.render(f"Target: {self._target}", True, _DEFAULT_TEXT_COLOR)
@@ -136,7 +138,8 @@ class GameScene(pygame_utils.Scene):
                         self._generate_number_buttons()
                         self._update_expression_text()
                         if result == self._target:
-                            print("Victory")
+                            self._win = True
+                            self._end_scene()
             elif event.key == pygame.K_ESCAPE:
                 self._numbers = self._original_numbers.copy()
                 self._generate_number_buttons()
@@ -172,7 +175,19 @@ class GameScene(pygame_utils.Scene):
         return int(result), True
 
     def _time_out(self):
-        pass
+        self._win = False
+        self._end_scene()
+
+    def _end_scene(self):
+        self._return_values = {
+            pygame_utils.ReturnValues.NEXT_SCENE: StatsScene,
+            "mode": self._timer_direction,
+            "difficulty": self._difficulty,
+            "username": self._return_values["username"],
+            "timer": self._timer,
+            "win": self._win
+        }
+        self._ended = True
 
 
 def generate_numbers() -> tuple[list[int, int, int, int, int, int], int, numbers_solver.Solution]:
