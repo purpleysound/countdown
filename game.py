@@ -125,6 +125,8 @@ class GameScene(pygame_utils.Scene):
                     if button.is_intersecting(event.pos):
                         if self._numbers[i] == self._current_expression[0] and self._numbers.count(self._current_expression[0]) == 1:
                             continue
+                        if self._current_expression[1] == 3 and self._numbers[i] == 0:
+                            break
                         self._current_expression.append(self._numbers[i])
                         self._update_expression_text()
                         break
