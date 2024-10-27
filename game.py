@@ -8,9 +8,11 @@ from stats import StatsScene
 
 _DEFAULT_FONT_NAME = "Lucinda"
 _DEFAULT_FONT_SIZE = 96
+_SMALLER_FONT_SIZE = 64
 _OPERATOR_FONT_SIZE = 128
 _DEFAULT_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _DEFAULT_FONT_SIZE)
 _OPERATOR_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _OPERATOR_FONT_SIZE)
+_SMALLER_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _SMALLER_FONT_SIZE)
 _DEFAULT_TEXT_COLOR = (255, 255, 255)
 _DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 
@@ -167,11 +169,13 @@ class GameScene(pygame_utils.Scene):
         elif len(self._current_expression) == 3:
             num1, operation_num, num2 = self._current_expression
             result, success = self._evaluate_expression()
+            self._expression_text = _DEFAULT_FONT.render(f"{num1} {_OPERATOR_NUM_TO_TEXT[operation_num]} {num2} = {result}", True, _DEFAULT_TEXT_COLOR)
             if not success:
                 if isinstance(result, float):
                     result = round(result, 2)
-                result = f"Disallowed ({result})"
-            self._expression_text = _DEFAULT_FONT.render(f"{num1} {_OPERATOR_NUM_TO_TEXT[operation_num]} {num2} = {result}", True, _DEFAULT_TEXT_COLOR)
+                result = f"Invalid ({result})"
+                self._expression_text = _SMALLER_FONT.render(f"{num1} {_OPERATOR_NUM_TO_TEXT[operation_num]} {num2} = {result}", True, _DEFAULT_TEXT_COLOR)
+
         else:
             raise RuntimeError("Invalid expression length")
         self._expression_text_rect = self._expression_text.get_rect(center=(400, 450))
