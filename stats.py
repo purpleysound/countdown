@@ -1,14 +1,17 @@
 import pygame
 import pygame_utils
 import json
-from math import ceil
+import main_menu
+import name_entry
 
 
 _BACKGROUND_COLOR = (64, 64, 64)
+_SECONDARY_BACKGROUND_COLOR = (32, 32, 32)
+_TERTIARY_BACKGROUND_COLOR = (48, 48, 48)
 _DEFAULT_FONT_NAME = "Lucinda"
 _DEFAULT_FONT_SIZE = 36
 _TITLE_FONT_SIZE = 96
-_DEFAULT_FONT_COLOR = (255, 255, 255)
+_DEFAULT_TEXT_COLOR = (255, 255, 255)
 _RED = (255, 0, 0)
 _GREEN = (0, 255, 0)
 _DEFAULT_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _DEFAULT_FONT_SIZE)
@@ -18,19 +21,40 @@ _TITLE_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _TITLE_FONT_SIZE)
 class StatsScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
-        update_stats(returned_values)
+        self._username = returned_values["username"]
         stats = load_expanded_stats(returned_values["username"])
-
-        if returned_values["win"]:
-            self._victory_text = _TITLE_FONT.render("Victory!", True, _GREEN)
+        if "mode" in returned_values:
+            update_stats(returned_values)
+            stats_text_y = 150
+            if returned_values["win"]:
+                self._victory_text = _TITLE_FONT.render("Victory!", True, _GREEN)
+            else:
+                self._victory_text = _TITLE_FONT.render("Failure", True, _RED)
         else:
-            self._victory_text = _TITLE_FONT.render("Failure", True, _RED)
-        self._victory_text_rect = self._victory_text.get_rect(center=(400, 50))
+            self._victory_text = _TITLE_FONT.render("", True, _DEFAULT_TEXT_COLOR)
+            stats_text_y = 100
 
-        self._stats_text = _TITLE_FONT.render("Stats", True, _DEFAULT_FONT_COLOR)
-        self._stats_text_rect = self._stats_text.get_rect(center=(400, 150))
+        self._victory_text_rect = self._victory_text.get_rect(center=(400, 50))
+        self._stats_text = _TITLE_FONT.render("Statistics", True, _DEFAULT_TEXT_COLOR)
+        self._stats_text_rect = self._stats_text.get_rect(center=(400, stats_text_y))
 
         self._generate_stats_text(stats)
+
+        self._home_button = pygame_utils.Button(
+            pygame.rect.Rect(10, 10, 150, 50),
+            text="Home",
+            text_color=_DEFAULT_TEXT_COLOR,
+            background_color=_TERTIARY_BACKGROUND_COLOR,
+            font=_DEFAULT_FONT
+        )
+
+        self._logout_button = pygame_utils.Button(
+            pygame.rect.Rect(640, 10, 150, 50),
+            text="Sign Out",
+            text_color=_DEFAULT_TEXT_COLOR,
+            background_color=_TERTIARY_BACKGROUND_COLOR,
+            font=_DEFAULT_FONT
+        )
 
     def update(self, dt: int):
         pass
@@ -41,9 +65,17 @@ class StatsScene(pygame_utils.Scene):
         screen.blit(self._stats_text, self._stats_text_rect)
         for text_surface, text_rect in self._stats_texts:
             screen.blit(text_surface, text_rect)
+        self._home_button.draw(screen)
+        self._logout_button.draw(screen)
 
     def handle_event(self, event: pygame.event.Event):
-        pass
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self._home_button.is_intersecting(event.pos):
+                self._return_values = {pygame_utils.ReturnValues.NEXT_SCENE: main_menu.MainMenuScene, "username": self._username}
+                self._ended = True
+            elif self._logout_button.is_intersecting(event.pos):
+                self._return_values = {pygame_utils.ReturnValues.NEXT_SCENE: name_entry.NameEntryScene}
+                self._ended = True
 
     def _generate_stats_text(self, stats: dict):
         self._stats_texts = []
@@ -57,7 +89,7 @@ class StatsScene(pygame_utils.Scene):
                 time = format_time(value)
                 text = f"{snake_case_to_title_case(key)}: {time}"
 
-            text_surface = _DEFAULT_FONT.render(text, True, _DEFAULT_FONT_COLOR)
+            text_surface = _DEFAULT_FONT.render(text, True, _DEFAULT_TEXT_COLOR)
             text_rect = text_surface.get_rect(topleft=(x, y))
             self._stats_texts.append((text_surface, text_rect))
             y += 40

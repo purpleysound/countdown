@@ -1,13 +1,17 @@
 import pygame
 import pygame_utils
 import enum
+import stats
+import name_entry
 
 _DEFAULT_FONT_NAME = "Lucinda"
 _DEFAULT_FONT_SIZE = 72
 _DEFAULT_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, _DEFAULT_FONT_SIZE)
+_SMALL_FONT = pygame.font.SysFont(_DEFAULT_FONT_NAME, 36)
 _DEFAULT_TEXT_COLOR = (255, 255, 255)
 _DEFAULT_BACKGROUND_COLOR = (64, 64, 64)
 _SECONDARY_BACKGROUND_COLOR = (32, 32, 32)
+_TERTIARY_BACKGROUND_COLOR = (48, 48, 48)
 _GREEN = (34, 177, 76)
 _RED = (237, 28, 36)
 _AMBER = (255, 127, 39)
@@ -66,6 +70,22 @@ class MainMenuScene(pygame_utils.Scene):
         self._to_start_text = _DEFAULT_FONT.render("Press Enter to Start", True, _DEFAULT_TEXT_COLOR)
         self._to_start_rect = self._to_start_text.get_rect(center=(400, 525))
 
+        self._stats_button = pygame_utils.Button(
+            pygame.rect.Rect(10, 10, 150, 50),
+            text="Stats",
+            text_color=_DEFAULT_TEXT_COLOR,
+            background_color=_TERTIARY_BACKGROUND_COLOR,
+            font=_SMALL_FONT
+        )
+
+        self._logout_button = pygame_utils.Button(
+            pygame.rect.Rect(640, 10, 150, 50),
+            text="Sign Out",
+            text_color=_DEFAULT_TEXT_COLOR,
+            background_color=_TERTIARY_BACKGROUND_COLOR,
+            font=_SMALL_FONT
+        )
+
 
     def update(self, dt: int):
         pass
@@ -78,6 +98,8 @@ class MainMenuScene(pygame_utils.Scene):
         for button in self._time_option_buttons:
             button.draw(screen)
         screen.blit(self._to_start_text, self._to_start_rect)
+        self._stats_button.draw(screen)
+        self._logout_button.draw(screen)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -88,6 +110,12 @@ class MainMenuScene(pygame_utils.Scene):
                 self._set_mode(Modes.TIME_LIMIT)
             if self._stopwatch_button.is_intersecting(event.pos):
                 self._set_mode(Modes.STOPWATCH)
+            if self._stats_button.is_intersecting(event.pos):
+                self._return_values = {pygame_utils.ReturnValues.NEXT_SCENE: stats.StatsScene, "username": self._username}
+                self._ended = True
+            if self._logout_button.is_intersecting(event.pos):
+                self._return_values = {pygame_utils.ReturnValues.NEXT_SCENE: name_entry.NameEntryScene}
+                self._ended = True
             for i, button in enumerate(self._time_option_buttons):
                 if button.is_intersecting(event.pos):
                     self._difficulty = Difficulty(i)
