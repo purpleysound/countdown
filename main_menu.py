@@ -35,7 +35,7 @@ class MainMenuScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
         self._username = returned_values["username"]
-        self._title = _DEFAULT_FONT.render("Countdown", True, _DEFAULT_TEXT_COLOR)
+        self._title = _DEFAULT_FONT.render(f"Hello {self._username}", True, _DEFAULT_TEXT_COLOR)
         self._title_rect = self._title.get_rect(center=(400, 50))
         
         self._time_limit_button = pygame_utils.Button(
