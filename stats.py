@@ -22,7 +22,6 @@ class StatsScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
         self._username = returned_values["username"]
-        stats = load_expanded_stats(returned_values["username"])
         if "mode" in returned_values:
             update_stats(returned_values)
             stats_text_y = 150
@@ -33,6 +32,8 @@ class StatsScene(pygame_utils.Scene):
         else:
             self._victory_text = _TITLE_FONT.render("", True, _DEFAULT_TEXT_COLOR)
             stats_text_y = 100
+        
+        stats = load_expanded_stats(returned_values["username"])
 
         self._victory_text_rect = self._victory_text.get_rect(center=(400, 50))
         self._stats_text = _TITLE_FONT.render("Statistics", True, _DEFAULT_TEXT_COLOR)
