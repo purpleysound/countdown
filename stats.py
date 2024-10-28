@@ -163,7 +163,10 @@ def load_expanded_stats(name: str) -> dict:
         stats["hard_win_percentage"] = round(stats["hard_wins"] / (stats["hard_wins"] + stats["hard_losses"]) * 100, 2)
     except ZeroDivisionError:
         stats["hard_win_percentage"] = 0
-    stats["average_time"] = stats["total_time"] // stats["games_played"]  # since measured in milliseconds, decimals are negligible
+    try:
+        stats["average_time"] = stats["total_time"] // stats["games_played"]  # since measured in milliseconds, decimals are negligible
+    except ZeroDivisionError:
+        stats["average_time"] = 0
     return stats
 
 def save_stats(stats: dict, name: str):
