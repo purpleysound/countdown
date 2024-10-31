@@ -94,8 +94,8 @@ class StatsScene(pygame_utils.Scene):
             text_rect = text_surface.get_rect(topleft=(x, y))
             self._stats_texts.append((text_surface, text_rect))
             y += 40
-            if y > 550:
-                x += 400
+            if y > 570:
+                x += 360
                 y = 200
 
 
@@ -105,7 +105,7 @@ def update_stats(returned_values):
     if returned_values["mode"] == 1:
         current_stats["stopwatch_games_played"] += 1
         time_taken = returned_values["timer"]
-    else:
+    elif returned_values["mode"] == -1:
         current_stats["time_limit_games_played"] += 1
         difficulty = returned_values["difficulty"].value
         difficulty_name = ("easy", "medium", "hard")[difficulty]
@@ -116,6 +116,16 @@ def update_stats(returned_values):
         current_stats[f"{difficulty_name}_{key}"] += 1
         start_time = (2 - difficulty) * 30000 + 31000
         time_taken = start_time - returned_values["timer"]
+    elif returned_values["mode"] == 0:
+        if returned_values["win"]:
+            key = "wins"
+        else:
+            key = "losses"
+        current_stats[f"multiplayer_{key}"] += 1
+        time_taken = returned_values["timer"]
+    else:
+        raise ValueError("Invalid mode")
+    
     current_stats["total_time"] += time_taken
     if returned_values["win"]:
         current_stats["wins"] += 1
@@ -143,7 +153,9 @@ def load_stats(name = None) -> dict:
         "medium_wins": 0,
         "medium_losses": 0,
         "hard_wins": 0,
-        "hard_losses": 0
+        "hard_losses": 0,
+        "multiplayer_wins": 0,
+        "multiplayer_losses": 0
     })
 
 def load_expanded_stats(name: str) -> dict:
@@ -164,6 +176,10 @@ def load_expanded_stats(name: str) -> dict:
         stats["hard_win_percentage"] = round(stats["hard_wins"] / (stats["hard_wins"] + stats["hard_losses"]) * 100, 2)
     except ZeroDivisionError:
         stats["hard_win_percentage"] = 0
+    try:
+        stats["multiplayer_win_percentage"] = round(stats["multiplayer_wins"] / (stats["multiplayer_wins"] + stats["multiplayer_losses"]) * 100, 2)
+    except ZeroDivisionError:
+        stats["multiplayer_win_percentage"] = 0
     try:
         stats["average_time"] = stats["total_time"] // stats["games_played"]  # since measured in milliseconds, decimals are negligible
     except ZeroDivisionError:
