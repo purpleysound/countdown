@@ -21,6 +21,7 @@ _DARK_RED = (136, 0, 21)
 class Modes(enum.Enum):
     TIME_LIMIT = -1
     STOPWATCH = 1
+    MULTIPLAYER = 0
 
 
 class Difficulty(enum.Enum):
@@ -29,6 +30,7 @@ class Difficulty(enum.Enum):
     HARD = 2
 
 import game
+import multiplayer_lobby
 
 
 class MainMenuScene(pygame_utils.Scene):
@@ -39,15 +41,21 @@ class MainMenuScene(pygame_utils.Scene):
         self._title_rect = self._title.get_rect(center=(400, 50))
         
         self._time_limit_button = pygame_utils.Button(
-            pygame.rect.Rect(75, 125, 250, 175),
+            pygame.rect.Rect(50, 125, 200, 175),
             text = "Time Limit",
             background_color = _SECONDARY_BACKGROUND_COLOR,
         )
         self._stopwatch_button = pygame_utils.Button(
-            pygame.rect.Rect(475, 125, 250, 175),
+            pygame.rect.Rect(300, 125, 200, 175),
             text="Stopwatch",
             background_color = _RED,
         )
+        self._multiplayer_button = pygame_utils.Button(
+            pygame.rect.Rect(550, 125, 200, 175),
+            text="Multiplayer",
+            background_color = _SECONDARY_BACKGROUND_COLOR,
+        )
+        self._hostname = ""
 
         self._time_option_buttons = [  # blend into the background, get set when time limit is selected
             pygame_utils.Button(
@@ -95,9 +103,14 @@ class MainMenuScene(pygame_utils.Scene):
         screen.blit(self._title, self._title_rect)
         self._time_limit_button.draw(screen)
         self._stopwatch_button.draw(screen)
+        self._multiplayer_button.draw(screen)
         for button in self._time_option_buttons:
             button.draw(screen)
         screen.blit(self._to_start_text, self._to_start_rect)
+        if self._mode == Modes.MULTIPLAYER:
+            hostname_text = _DEFAULT_FONT.render(f"hostname: {self._hostname}", True, _DEFAULT_TEXT_COLOR)
+            hostname_rect = hostname_text.get_rect(center=(400, 400))
+            screen.blit(hostname_text, hostname_rect)
         self._stats_button.draw(screen)
         self._logout_button.draw(screen)
 
@@ -105,11 +118,19 @@ class MainMenuScene(pygame_utils.Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 self._end_scene()
+            if event.key == pygame.K_BACKSPACE:
+                if self._mode == Modes.MULTIPLAYER:
+                    self._hostname = self._hostname[:-1]
+            else:
+                if self._mode == Modes.MULTIPLAYER:
+                    self._hostname += event.unicode
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self._time_limit_button.is_intersecting(event.pos):
                 self._set_mode(Modes.TIME_LIMIT)
             if self._stopwatch_button.is_intersecting(event.pos):
                 self._set_mode(Modes.STOPWATCH)
+            if self._multiplayer_button.is_intersecting(event.pos):
+                self._set_mode(Modes.MULTIPLAYER)
             if self._stats_button.is_intersecting(event.pos):
                 self._return_values = {pygame_utils.ReturnValues.NEXT_SCENE: stats.StatsScene, "username": self._username}
                 self._ended = True
@@ -125,6 +146,7 @@ class MainMenuScene(pygame_utils.Scene):
         if mode == Modes.TIME_LIMIT:
             self._time_limit_button.set_background_color(_RED)
             self._stopwatch_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
+            self._multiplayer_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
             for i, button in enumerate(self._time_option_buttons):
                 button.set_background_color((_GREEN, _AMBER, _DARK_RED)[i])
                 button.set_text(f"{('Easy', 'Medium', 'Hard')[i]} - {90 - 30 * i}s")
@@ -132,18 +154,34 @@ class MainMenuScene(pygame_utils.Scene):
         elif mode == Modes.STOPWATCH:
             self._time_limit_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
             self._stopwatch_button.set_background_color(_RED)
+            self._multiplayer_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
             for i, button in enumerate(self._time_option_buttons):
                 button.set_background_color(_DEFAULT_BACKGROUND_COLOR)
                 button.set_text("")
-    
+
+        elif mode == Modes.MULTIPLAYER:
+            self._time_limit_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
+            self._stopwatch_button.set_background_color(_SECONDARY_BACKGROUND_COLOR)
+            self._multiplayer_button.set_background_color(_RED)
+            for i, button in enumerate(self._time_option_buttons):
+                button.set_background_color(_DEFAULT_BACKGROUND_COLOR)
+                button.set_text("")
+            self._hostname = ""
         else:
             raise ValueError(f"Invalid mode: {mode}")
         
     def _end_scene(self):
-        self._return_values = {
-            pygame_utils.ReturnValues.NEXT_SCENE: game.GameScene,
-            "mode": self._mode,
-            "difficulty": self._difficulty,
-            "username": self._username
-        }
+        if self._mode == Modes.MULTIPLAYER:
+            self._return_values = {
+                pygame_utils.ReturnValues.NEXT_SCENE: multiplayer_lobby.MultiplayerLobbyScene,
+                "username": self._username,
+                "hostname": self._hostname
+            }
+        else:
+            self._return_values = {
+                pygame_utils.ReturnValues.NEXT_SCENE: game.GameScene,
+                "mode": self._mode,
+                "difficulty": self._difficulty,
+                "username": self._username
+            }
         self._ended = True

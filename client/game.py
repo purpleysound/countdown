@@ -35,7 +35,11 @@ class GameScene(pygame_utils.Scene):
     def __init__(self, returned_values):
         super().__init__(returned_values)
         self._return_values["username"] = returned_values["username"]
-        self._numbers, self._target, self._solution = generate_numbers()
+        if "numbers" in returned_values:
+            self._numbers, self._target = returned_values["numbers"]
+            self._solution = returned_values.get("solution", None)
+        else:
+            self._numbers, self._target, self._solution = generate_numbers()
         self._original_numbers = self._numbers.copy()
         mode = returned_values["mode"]
         if mode == Modes.STOPWATCH:
@@ -51,9 +55,12 @@ class GameScene(pygame_utils.Scene):
                 self._timer = 31000
             else:
                 raise ValueError("Invalid difficulty")
+        elif mode == Modes.MULTIPLAYER:
+            self._timer = 0
+            self._difficulty = -1
         else:
             raise ValueError("Invalid mode")
-        self._timer_direction = mode.value # 1 for stopwatch, -1 for time limit countdown
+        self._timer_direction = -1 if mode == Modes.TIME_LIMIT else 1
         self._timer_started = False
 
         self._target_text = _DEFAULT_FONT.render(f"Target: {self._target}", True, _DEFAULT_TEXT_COLOR)
