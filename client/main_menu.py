@@ -118,7 +118,9 @@ class MainMenuScene(pygame_utils.Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 self._end_scene()
-            if event.key == pygame.K_BACKSPACE:
+            elif pygame.key.get_mods() & pygame.KMOD_CTRL and event.key == pygame.K_v:
+                self._hostname += pygame.scrap.get(pygame.SCRAP_TEXT).decode()[:-1]
+            elif event.key == pygame.K_BACKSPACE:
                 if self._mode == Modes.MULTIPLAYER:
                     self._hostname = self._hostname[:-1]
             else:

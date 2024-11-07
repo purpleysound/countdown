@@ -65,6 +65,7 @@ class SceneHandler:
         self._clock = pygame.time.Clock()
         self._running = True
         self._current_scene = None
+        pygame.scrap.init()
 
     def run(self):
         if self._current_scene is None:
