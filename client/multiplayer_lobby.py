@@ -67,6 +67,7 @@ class MultiplayerLobbyScene(pygame_utils.Scene):
                 self._ready_button.set_background_color(_DEFAULT_BACKGROUND_COLOR)
                 self._ready_button.set_text("")
                 self._network_client.send_message(f"ready {self._player_idx}")
+                self._ready = True
 
     def _handle_message(self, message):
         command, arg = message.split(" ", 1)
