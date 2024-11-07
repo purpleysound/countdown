@@ -88,6 +88,8 @@ class CDHandler(socketserver.BaseRequestHandler):
             self.ready(int(arg))
         elif command == "finish":
             self.finished(int(arg))
+        elif command == "reset":
+            self.reset()
 
     def set_name(self, name: str):
         if CDHandler.cm.is_full():
@@ -152,6 +154,9 @@ class CDHandler(socketserver.BaseRequestHandler):
             CDHandler.cm.reset()
         t = threading.Thread(target=fun)
         t.start()
+
+    def reset():
+        CDHandler.cm.reset()
 
 
 if __name__ == "__main__":
